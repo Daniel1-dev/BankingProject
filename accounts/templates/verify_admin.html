@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Admin Verification • Contribution Tracker</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background particles */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(circle at 20% 40%, rgba(37, 99, 235, 0.08) 0%, transparent 50%),
+                              radial-gradient(circle at 80% 70%, rgba(245, 158, 11, 0.06) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        /* Main Card */
+        .verification-container {
+            width: 100%;
+            max-width: 460px;
+            margin: auto;
+            position: relative;
+            z-index: 1;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(25px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border-radius: 2rem;
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 30px 55px -12px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Header Section */
+        .verification-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .icon-circle {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            width: 80px;
+            height: 80px;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.2rem;
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(245, 158, 11, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+            }
+        }
+
+        .icon-circle i {
+            font-size: 2.2rem;
+            color: white;
+        }
+
+        .verification-header h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #1e293b, #f59e0b);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+            margin-bottom: 8px;
+        }
+
+        .verification-header p {
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+
+        /* Messages/Alerts */
+        .messages-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-message {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+            padding: 12px 16px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #991b1b;
+            animation: slideIn 0.3s ease;
+        }
+
+        .alert-message i {
+            font-size: 1rem;
+            color: #ef4444;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Form Groups */
+        .form-group {
+            margin-bottom: 1.75rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #334155;
+            margin-bottom: 8px;
+            letter-spacing: 0.3px;
+        }
+
+        .form-group label i {
+            margin-right: 6px;
+            color: #f59e0b;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 16px;
+            color: #94a3b8;
+            font-size: 1rem;
+            pointer-events: none;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 14px 16px 14px 48px;
+            font-size: 0.95rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 1rem;
+            font-family: 'Inter', monospace;
+            transition: all 0.2s;
+            background: white;
+            color: #1e293b;
+            font-weight: 500;
+        }
+
+        .input-wrapper input:focus {
+            outline: none;
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+        }
+
+        .input-wrapper input::placeholder {
+            color: #cbd5e1;
+            font-weight: 400;
+        }
+
+        /* Password Toggle Button */
+        .toggle-password {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #94a3b8;
+            transition: color 0.2s;
+            background: transparent;
+            border: none;
+            padding: 0;
+            width: auto;
+            z-index: 2;
+        }
+
+        .toggle-password:hover {
+            color: #f59e0b;
+            background: transparent;
+            transform: translateY(-50%);
+        }
+
+        /* Verify Button */
+        .verify-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border: none;
+            border-radius: 1rem;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+        }
+
+        .verify-btn:hover {
+            background: linear-gradient(135deg, #d97706, #b45309);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.35);
+        }
+
+        .verify-btn:active {
+            transform: translateY(1px);
+        }
+
+        /* Footer Links */
+        .footer-link {
+            text-align: center;
+            margin-top: 1.8rem;
+            padding-top: 1.2rem;
+            border-top: 1px solid #eef2f6;
+        }
+
+        .footer-link a {
+            text-decoration: none;
+            color: #f59e0b;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .footer-link a:hover {
+            color: #d97706;
+        }
+
+        /* Security Badge */
+        .security-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            font-size: 0.7rem;
+            color: #94a3b8;
+        }
+
+        .security-badge i {
+            font-size: 0.8rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 500px) {
+            .card {
+                padding: 1.8rem;
+            }
+            .verification-header h2 {
+                font-size: 1.5rem;
+            }
+            .icon-circle {
+                width: 60px;
+                height: 60px;
+            }
+            .icon-circle i {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="verification-container">
+    <div class="card">
+        <!-- Header with Icon -->
+        <div class="verification-header">
+            <div class="icon-circle">
+                <i class="fa-solid fa-shield-haltered"></i>
+            </div>
+            <h2>Admin Verification</h2>
+            <p>Enter your admin password to continue</p>
+        </div>
+
+        <!-- Django Messages (preserved logic) -->
+        {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+            <div class="alert-message">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Verification Form (preserved logic) -->
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label>
+                    <i class="fa-solid fa-lock"></i> Admin Password
+                </label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-key"></i>
+                    <input type="password" 
+                           name="password" 
+                           id="passwordField"
+                           placeholder="Enter admin password"
+                           autocomplete="current-password"
+                           required>
+                    <button type="button" class="toggle-password" onclick="togglePassword()">
+                        <i class="fa-regular fa-eye-slash" id="toggleIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="verify-btn">
+                <i class="fa-solid fa-check-circle"></i> Verify Access
+            </button>
+        </form>
+
+        <!-- Footer Links -->
+        <div class="footer-link">
+            <a href="{% url 'login' %}">
+                <i class="fa-solid fa-arrow-left"></i> Back to User Login
+            </a>
+        </div>
+
+        <!-- Security Badge -->
+        <div class="security-badge">
+            <i class="fa-solid fa-lock"></i>
+            <span>Secure Admin Portal</span>
+            <i class="fa-solid fa-shield"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Password Toggle Functionality (purely frontend) -->
+<script>
+    function togglePassword() {
+        const passwordField = document.getElementById('passwordField');
+        const toggleIcon = document.getElementById('toggleIcon');
+        
+        if (passwordField && toggleIcon) {
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            } else {
+                passwordField.type = 'password';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            }
+        }
+    }
+
+    // Add input focus effects
+    const inputs = document.querySelectorAll('.input-wrapper input');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.style.transform = 'scale(1.01)';
+        });
+        input.addEventListener('blur', function() {
+            this.parentElement.style.transform = 'scale(1)';
+        });
+    });
+
+    // Add enter key support (already native to forms)
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const verifyBtn = document.querySelector('.verify-btn');
+                if (verifyBtn) {
+                    verifyBtn.click();
+                }
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

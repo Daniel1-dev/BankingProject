@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Change Contribution Weeks • Admin Settings</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f0f4f9 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            padding: 32px 24px;
+        }
+
+        /* Back Button */
+        .back-link {
+            max-width: 540px;
+            margin: 0 auto 20px auto;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 10px 20px;
+            border-radius: 40px;
+            text-decoration: none;
+            color: #475569;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+
+        .back-btn:hover {
+            background: #f8fafc;
+            border-color: #2563eb;
+            color: #2563eb;
+            transform: translateX(-3px);
+        }
+
+        /* Main Card */
+        .card {
+            max-width: 540px;
+            margin: auto;
+            background: white;
+            border-radius: 2rem;
+            padding: 2.5rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 30px 55px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Header */
+        .card-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .icon-circle {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            width: 80px;
+            height: 80px;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.2rem;
+            box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.4);
+        }
+
+        .icon-circle i {
+            font-size: 2.2rem;
+            color: white;
+        }
+
+        .card-header h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #1e293b, #f59e0b);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .card-header p {
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+
+        /* Current Value Display */
+        .current-value {
+            background: linear-gradient(135deg, #fefce8, #fef3c7);
+            border-radius: 1rem;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 1.75rem;
+            border: 1px solid #fde68a;
+        }
+
+        .current-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #92400e;
+            margin-bottom: 8px;
+        }
+
+        .current-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #d97706;
+            line-height: 1;
+        }
+
+        .current-number small {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #b45309;
+        }
+
+        /* Form Groups */
+        .form-group {
+            margin-bottom: 1.75rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #334155;
+            margin-bottom: 10px;
+        }
+
+        .form-group label i {
+            margin-right: 8px;
+            color: #f59e0b;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 16px;
+            color: #94a3b8;
+            font-size: 1.1rem;
+            pointer-events: none;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 16px 16px 16px 48px;
+            font-size: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 1rem;
+            font-family: 'Inter', monospace;
+            transition: all 0.25s;
+            background: white;
+            color: #1e293b;
+            font-weight: 500;
+        }
+
+        .input-wrapper input:focus {
+            outline: none;
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1);
+        }
+
+        .input-wrapper input::placeholder {
+            color: #cbd5e1;
+            font-weight: 400;
+        }
+
+        /* Range Slider */
+        .range-container {
+            margin-top: 16px;
+        }
+
+        .range-slider {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            background: #e2e8f0;
+            border-radius: 10px;
+            outline: none;
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #f59e0b;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+            transition: transform 0.1s;
+        }
+
+        .range-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .range-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 0.65rem;
+            color: #94a3b8;
+        }
+
+        /* Quick Select Buttons */
+        .quick-select {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .quick-btn {
+            flex: 1;
+            padding: 8px 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .quick-btn:hover {
+            background: #fef3c7;
+            border-color: #f59e0b;
+            color: #d97706;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: #fefce8;
+            border-left: 4px solid #eab308;
+            padding: 14px 18px;
+            border-radius: 14px;
+            margin: 20px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .info-box i {
+            color: #eab308;
+            font-size: 1.1rem;
+            margin-top: 2px;
+        }
+
+        .info-box p {
+            font-size: 0.75rem;
+            color: #854d0e;
+            line-height: 1.4;
+        }
+
+        /* Preview Section */
+        .preview-section {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 16px 20px;
+            margin: 20px 0;
+            border: 1px solid #eef2f6;
+            text-align: center;
+        }
+
+        .preview-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .preview-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .preview-value span {
+            color: #f59e0b;
+            font-size: 1.6rem;
+            font-weight: 800;
+        }
+
+        /* Save Button */
+        .save-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border: none;
+            border-radius: 1rem;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.25s;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 8px;
+            box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+        }
+
+        .save-btn:hover {
+            background: linear-gradient(135deg, #d97706, #b45309);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+        }
+
+        .save-btn:active {
+            transform: translateY(1px);
+        }
+
+        /* Message Alerts */
+        .messages-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-message {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+            padding: 12px 16px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #991b1b;
+            animation: slideIn 0.3s ease;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            border-left-color: #22c55e;
+            color: #15803d;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            body {
+                padding: 20px 16px;
+            }
+            .card {
+                padding: 1.8rem;
+            }
+            .card-header h2 {
+                font-size: 1.4rem;
+            }
+            .icon-circle {
+                width: 65px;
+                height: 65px;
+            }
+            .icon-circle i {
+                font-size: 1.8rem;
+            }
+            .current-number {
+                font-size: 2rem;
+            }
+            .quick-select {
+                gap: 8px;
+            }
+            .quick-btn {
+                font-size: 0.7rem;
+                padding: 6px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="back-link">
+    <a href="{% url 'admin_dashboard' %}" class="back-btn">
+        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <div class="icon-circle">
+            <i class="fa-solid fa-calendar-week"></i>
+        </div>
+        <h2>Change Contribution Weeks</h2>
+        <p>Set the total number of weeks for the contribution period</p>
+    </div>
+
+    <!-- Django Messages (preserved logic) -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert-message {% if message.tags == 'success' %}alert-success{% endif %}">
+            <i class="fa-solid {% if message.tags == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Current Value Display -->
+    <div class="current-value">
+        <div class="current-label">
+            <i class="fa-regular fa-clock"></i> Current Setting
+        </div>
+        <div class="current-number">
+            {{ settings.total_weeks|default:"12" }} <small>weeks</small>
+        </div>
+    </div>
+
+    <!-- Django Form (preserved logic - field name is 'total_weeks') -->
+    <form method="POST" id="weeksForm">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label>
+                <i class="fa-solid fa-pen"></i> Total Weeks
+            </label>
+            <div class="input-wrapper">
+                <i class="fa-regular fa-calendar"></i>
+                <input type="number" 
+                       name="total_weeks" 
+                       id="weeksInput"
+                       value="{{ settings.total_weeks|default:'12' }}"
+                       min="1"
+                       max="52"
+                       step="1"
+                       required>
+            </div>
+            
+            <!-- Range Slider for visual selection -->
+            <div class="range-container">
+                <input type="range" 
+                       id="weeksRange" 
+                       min="1" 
+                       max="52" 
+                       step="1" 
+                       value="{{ settings.total_weeks|default:'12' }}"
+                       class="range-slider">
+                <div class="range-labels">
+                    <span>1</span>
+                    <span>10</span>
+                    <span>20</span>
+                    <span>30</span>
+                    <span>40</span>
+                    <span>52</span>
+                </div>
+            </div>
+
+            <!-- Quick Select Buttons -->
+            <div class="quick-select">
+                <div class="quick-btn" data-weeks="8">8 weeks</div>
+                <div class="quick-btn" data-weeks="12">12 weeks</div>
+                <div class="quick-btn" data-weeks="24">24 weeks</div>
+                <div class="quick-btn" data-weeks="36">36 weeks</div>
+                <div class="quick-btn" data-weeks="52">52 weeks</div>
+            </div>
+        </div>
+
+        <!-- Live Preview -->
+        <div class="preview-section">
+            <div class="preview-title">
+                <i class="fa-regular fa-eye"></i> Live Preview
+            </div>
+            <div class="preview-value">
+                Contribution period: <span id="previewWeeks">12</span> weeks
+                <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 4px;">
+                    ≈ <span id="previewMonths">3</span> months
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Box -->
+        <div class="info-box">
+            <i class="fa-solid fa-circle-info"></i>
+            <p>
+                <strong>Note:</strong> Changing the total weeks will affect contribution targets and progress 
+                calculations for all users. This change applies immediately to the entire program.
+            </p>
+        </div>
+
+        <button type="submit" class="save-btn">
+            <i class="fa-regular fa-floppy-disk"></i> Save Changes
+        </button>
+    </form>
+</div>
+
+<script>
+    // Get DOM elements
+    const weeksInput = document.getElementById('weeksInput');
+    const weeksRange = document.getElementById('weeksRange');
+    const previewWeeks = document.getElementById('previewWeeks');
+    const previewMonths = document.getElementById('previewMonths');
+    const quickBtns = document.querySelectorAll('.quick-btn');
+    const form = document.getElementById('weeksForm');
+
+    // Function to update preview
+    function updatePreview(value) {
+        const weeksValue = parseInt(value) || 0;
+        if (previewWeeks) {
+            previewWeeks.textContent = weeksValue;
+        }
+        if (previewMonths) {
+            const months = Math.round(weeksValue / 4.33 * 10) / 10;
+            previewMonths.textContent = months;
+        }
+    }
+
+    // Sync input and range
+    function syncInputs(value) {
+        const numValue = parseInt(value);
+        if (!isNaN(numValue)) {
+            if (weeksInput) weeksInput.value = numValue;
+            if (weeksRange) weeksRange.value = numValue;
+            updatePreview(numValue);
+        }
+    }
+
+    // Event listeners
+    if (weeksInput) {
+        weeksInput.addEventListener('input', function() {
+            let value = parseInt(this.value);
+            if (isNaN(value)) value = 1;
+            if (value < 1) value = 1;
+            if (value > 52) value = 52;
+            syncInputs(value);
+        });
+    }
+
+    if (weeksRange) {
+        weeksRange.addEventListener('input', function() {
+            let value = parseInt(this.value);
+            syncInputs(value);
+        });
+    }
+
+    // Quick select buttons
+    quickBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const weeks = parseInt(this.getAttribute('data-weeks'));
+            syncInputs(weeks);
+        });
+    });
+
+    // Initialize preview on page load
+    const initialValue = "{{ settings.total_weeks|default:'12' }}";
+    updatePreview(initialValue);
+
+    // Add input focus effects
+    const inputs = document.querySelectorAll('.input-wrapper input');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.style.transform = 'scale(1.01)';
+        });
+        input.addEventListener('blur', function() {
+            this.parentElement.style.transform = 'scale(1)';
+        });
+    });
+
+    // Confirmation on form submit for large changes
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const currentValue = parseInt("{{ settings.total_weeks|default:'12' }}");
+            const newValue = parseInt(weeksInput ? weeksInput.value : 12);
+            
+            if (currentValue !== newValue && Math.abs(currentValue - newValue) > 10) {
+                const confirmChange = confirm(
+                    `You are changing the total weeks from ${currentValue} to ${newValue} weeks.\n\n` +
+                    `This will significantly affect all users' targets. Are you sure you want to proceed?`
+                );
+                if (!confirmChange) {
+                    e.preventDefault();
+                }
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

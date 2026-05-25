@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Edit Contribution • Admin Portal</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f0f4f9 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            padding: 32px 24px;
+        }
+
+        /* Back Button */
+        .back-link {
+            max-width: 520px;
+            margin: 0 auto 20px auto;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 10px 20px;
+            border-radius: 40px;
+            text-decoration: none;
+            color: #475569;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+
+        .back-btn:hover {
+            background: #f8fafc;
+            border-color: #2563eb;
+            color: #2563eb;
+            transform: translateX(-3px);
+        }
+
+        /* Main Card */
+        .card {
+            max-width: 520px;
+            margin: auto;
+            background: white;
+            border-radius: 2rem;
+            padding: 2rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 30px 55px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Header */
+        .card-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .icon-circle {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            width: 70px;
+            height: 70px;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+        }
+
+        .icon-circle i {
+            font-size: 2rem;
+            color: white;
+        }
+
+        .card-header h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1e293b, #f59e0b);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 6px;
+        }
+
+        .card-header p {
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+
+        /* Form Groups */
+        .form-group {
+            margin-bottom: 1.75rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #334155;
+            margin-bottom: 8px;
+            letter-spacing: 0.3px;
+        }
+
+        .form-group label i {
+            margin-right: 6px;
+            width: 18px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 16px;
+            color: #94a3b8;
+            font-size: 1rem;
+            pointer-events: none;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 14px 16px 14px 48px;
+            font-size: 0.95rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 1rem;
+            font-family: 'Inter', monospace;
+            transition: all 0.2s;
+            background: white;
+            color: #1e293b;
+            font-weight: 500;
+        }
+
+        .input-wrapper input:focus {
+            outline: none;
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+        }
+
+        .input-wrapper input::placeholder {
+            color: #cbd5e1;
+            font-weight: 400;
+        }
+
+        /* Select Dropdown */
+        .select-wrapper {
+            position: relative;
+        }
+
+        .select-wrapper i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 1rem;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .select-wrapper select {
+            width: 100%;
+            padding: 14px 16px 14px 48px;
+            font-size: 0.95rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 1rem;
+            font-family: 'Inter', monospace;
+            transition: all 0.2s;
+            background: white;
+            color: #1e293b;
+            font-weight: 500;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .select-wrapper select:focus {
+            outline: none;
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+        }
+
+        .select-arrow {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            pointer-events: none;
+        }
+
+        /* Preview Section */
+        .preview-section {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 16px 20px;
+            margin: 20px 0;
+            border: 1px solid #eef2f6;
+        }
+
+        .preview-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .preview-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .preview-badge {
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .preview-badge.paid {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .preview-badge.missed {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border: none;
+            border-radius: 1rem;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 8px;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+        }
+
+        .submit-btn:hover {
+            background: linear-gradient(135deg, #d97706, #b45309);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.35);
+        }
+
+        .submit-btn:active {
+            transform: translateY(1px);
+        }
+
+        /* Message Alerts */
+        .messages-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-message {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+            padding: 12px 16px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #991b1b;
+            animation: slideIn 0.3s ease;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            border-left-color: #22c55e;
+            color: #15803d;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Error styling */
+        .error-message {
+            color: #ef4444;
+            font-size: 0.7rem;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            body {
+                padding: 20px 16px;
+            }
+            .card {
+                padding: 1.5rem;
+            }
+            .card-header h2 {
+                font-size: 1.3rem;
+            }
+            .icon-circle {
+                width: 55px;
+                height: 55px;
+            }
+            .icon-circle i {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="back-link">
+    <a href="{% url 'admin_dashboard' %}" class="back-btn">
+        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <div class="icon-circle">
+            <i class="fa-solid fa-pen-to-square"></i>
+        </div>
+        <h2>Edit Contribution</h2>
+        <p>Update contribution amount or status</p>
+    </div>
+
+    <!-- Django Messages (if any) -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert-message {% if message.tags == 'success' %}alert-success{% endif %}">
+            <i class="fa-solid {% if message.tags == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Live Preview Section -->
+    <div class="preview-section">
+        <div class="preview-title">
+            <i class="fa-regular fa-eye"></i> Live Preview
+        </div>
+        <div class="preview-value">
+            <span id="previewAmount">₦{{ contribution.amount|default:"0.00"|floatformat:2 }}</span>
+            <span id="previewBadge" class="preview-badge 
+                {% if contribution.status == 'Paid' %}paid{% else %}missed{% endif %}">
+                <i class="fa-regular {% if contribution.status == 'Paid' %}fa-circle-check{% else %}fa-circle-xmark{% endif %}"></i>
+                {{ contribution.status|default:"Paid" }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Django Form (preserved logic) -->
+    <form method="POST" id="editContributionForm">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label class="amount-label">
+                <i class="fa-solid fa-naira-sign"></i> Contribution Amount
+            </label>
+            <div class="input-wrapper">
+                <i class="fa-solid fa-naira-sign"></i>
+                <input type="number" 
+                       name="amount" 
+                       id="amountInput"
+                       value="{{ contribution.amount|floatformat:2 }}"
+                       placeholder="Enter amount"
+                       step="0.01"
+                       min="0"
+                       required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>
+                <i class="fa-solid fa-flag-checkered"></i> Payment Status
+            </label>
+            <div class="select-wrapper">
+                <i class="fa-regular fa-circle-check"></i>
+                <select name="status" id="statusSelect">
+                    <option value="Paid" {% if contribution.status == "Paid" %}selected{% endif %}>
+                        ✓ Paid
+                    </option>
+                    <option value="Missed" {% if contribution.status == "Missed" %}selected{% endif %}>
+                        ✗ Missed
+                    </option>
+                </select>
+                <i class="fa-solid fa-chevron-down select-arrow"></i>
+            </div>
+        </div>
+
+        <button type="submit" class="submit-btn">
+            <i class="fa-regular fa-floppy-disk"></i> Save Changes
+        </button>
+    </form>
+</div>
+
+<script>
+    // Get DOM elements with null checks
+    const amountInput = document.getElementById('amountInput');
+    const statusSelect = document.getElementById('statusSelect');
+    const previewAmount = document.getElementById('previewAmount');
+    const previewBadge = document.getElementById('previewBadge');
+
+    // Function to update live preview
+    function updatePreview() {
+        // Update amount preview with null check
+        if (amountInput && previewAmount) {
+            let amount = amountInput.value;
+            if (amount && !isNaN(amount) && amount !== '') {
+                previewAmount.textContent = '₦' + parseFloat(amount).toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            } else {
+                previewAmount.textContent = '₦0.00';
+            }
+        }
+
+        // Update status preview with null check
+        if (statusSelect && previewBadge) {
+            const selectedStatus = statusSelect.value;
+            if (selectedStatus === 'Paid') {
+                previewBadge.className = 'preview-badge paid';
+                previewBadge.innerHTML = '<i class="fa-regular fa-circle-check"></i> Paid';
+            } else {
+                previewBadge.className = 'preview-badge missed';
+                previewBadge.innerHTML = '<i class="fa-regular fa-circle-xmark"></i> Missed';
+            }
+        }
+    }
+
+    // Add event listeners only if elements exist
+    if (amountInput) {
+        amountInput.addEventListener('input', updatePreview);
+    }
+    
+    if (statusSelect) {
+        statusSelect.addEventListener('change', updatePreview);
+    }
+
+    // Initialize preview on page load
+    updatePreview();
+
+    // Add input focus effects with null checks
+    const inputs = document.querySelectorAll('.input-wrapper input, .select-wrapper select');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.style.transform = 'scale(1.01)';
+        });
+        input.addEventListener('blur', function() {
+            this.parentElement.style.transform = 'scale(1)';
+        });
+    });
+</script>
+
+</body>
+</html>

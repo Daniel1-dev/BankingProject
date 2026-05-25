@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Edit User</title>
+
+<style>
+
+body{
+
+font-family:Arial;
+background:#f4f7fc;
+padding:20px;
+
+}
+
+.card{
+
+max-width:500px;
+margin:auto;
+background:white;
+padding:25px;
+border-radius:15px;
+
+}
+
+input{
+
+width:100%;
+padding:12px;
+margin-bottom:15px;
+
+}
+
+button{
+
+padding:12px;
+width:100%;
+background:#2563eb;
+border:none;
+color:white;
+border-radius:10px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>
+
+Edit User
+
+</h2>
+
+<form method="POST">
+
+{% csrf_token %}
+
+<input
+type="text"
+name="username"
+value="{{edit_user.username}}">
+
+
+<input
+type="email"
+name="email"
+value="{{edit_user.email}}">
+
+
+<input
+type="number"
+name="weekly_amount"
+value="{{profile.weekly_amount}}"
+placeholder="Weekly Contribution Amount">
+
+
+<input
+type="password"
+name="password"
+placeholder="New Password (optional)">
+
+
+<button>
+
+Save Changes
+
+</button>
+
+</form>
+
+</div>
+
+</body>
+
+</html>

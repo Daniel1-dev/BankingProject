@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Make Transfer • Contribution Tracker</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f0f4f8 0%, #e8edf2 100%);
+            min-height: 100vh;
+            padding: 32px 24px;
+        }
+
+        /* Menu Button */
+        .menu-btn {
+            position: fixed;
+            top: 20px;
+            left: 24px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+            z-index: 100;
+            text-decoration: none;
+        }
+
+        .menu-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(37,99,235,0.4);
+        }
+
+        /* Main Container */
+        .transfer-container {
+            max-width: 560px;
+            margin: 0 auto;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(25px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Header */
+        .transfer-header {
+            text-align: center;
+            margin-bottom: 32px;
+            margin-top: 40px;
+        }
+
+        .icon-circle {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            width: 70px;
+            height: 70px;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .icon-circle i {
+            font-size: 2rem;
+            color: white;
+        }
+
+        .transfer-header h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1e293b, #3b82f6);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 6px;
+        }
+
+        .transfer-header p {
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+
+        /* Main Card */
+        .card {
+            background: white;
+            border-radius: 28px;
+            padding: 32px;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 30px 55px -12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Transfer Details */
+        .transfer-details {
+            margin-bottom: 32px;
+        }
+
+        .detail-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 0;
+            border-bottom: 1px solid #f0f2f5;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .detail-label i {
+            width: 24px;
+            font-size: 1.1rem;
+            color: #3b82f6;
+        }
+
+        .detail-value {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 1rem;
+            letter-spacing: -0.2px;
+        }
+
+        /* Amount Highlight */
+        .amount-highlight {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border-radius: 20px;
+            padding: 24px;
+            text-align: center;
+            margin: 16px 0 28px 0;
+        }
+
+        .amount-highlight .label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #475569;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .amount-highlight .value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1e40af;
+            line-height: 1.2;
+        }
+
+        .amount-highlight .value small {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* Security Notice */
+        .security-notice {
+            background: #fefce8;
+            border-left: 4px solid #eab308;
+            padding: 14px 18px;
+            border-radius: 16px;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.8rem;
+            color: #854d0e;
+        }
+
+        .security-notice i {
+            font-size: 1.2rem;
+        }
+
+        /* Form Button */
+        form {
+            margin-top: 8px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            border: none;
+            border-radius: 60px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        }
+
+        .submit-btn:hover {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(34, 197, 94, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(1px);
+        }
+
+        /* Copy Button */
+        .copy-btn {
+            background: transparent;
+            border: none;
+            color: #3b82f6;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-left: 8px;
+            padding: 4px 8px;
+            border-radius: 40px;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .copy-btn:hover {
+            background: #eff6ff;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Steps Indicator */
+        .steps {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .step {
+            width: 40px;
+            height: 40px;
+            border-radius: 40px;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #64748b;
+        }
+
+        .step.active {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+        }
+
+        .step.completed {
+            background: #22c55e;
+            color: white;
+        }
+
+        /* Message Alerts */
+        .messages-container {
+            margin-bottom: 20px;
+        }
+
+        .alert-message {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+            padding: 12px 16px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #991b1b;
+            animation: slideIn 0.3s ease;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            border-left-color: #22c55e;
+            color: #15803d;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Helper Text */
+        .helper-text {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #94a3b8;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            body {
+                padding: 16px;
+            }
+            .card {
+                padding: 24px;
+            }
+            .transfer-header h2 {
+                font-size: 1.5rem;
+            }
+            .icon-circle {
+                width: 55px;
+                height: 55px;
+            }
+            .icon-circle i {
+                font-size: 1.5rem;
+            }
+            .amount-highlight .value {
+                font-size: 1.8rem;
+            }
+            .detail-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            .menu-btn {
+                top: 12px;
+                left: 16px;
+                width: 40px;
+                height: 40px;
+            }
+            .transfer-header {
+                margin-top: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Back to Dashboard Button -->
+<a href="{% url 'dashboard' %}" class="menu-btn">
+    <i class="fa-solid fa-arrow-left"></i>
+</a>
+
+<div class="transfer-container">
+    <!-- Steps Indicator -->
+    <div class="steps">
+        <div class="step active">1</div>
+        <div class="step">2</div>
+        <div class="step">3</div>
+    </div>
+
+    <!-- Header -->
+    <div class="transfer-header">
+        <div class="icon-circle">
+            <i class="fa-solid fa-arrow-right-arrow-left"></i>
+        </div>
+        <h2>Make Transfer</h2>
+        <p>Complete your contribution payment securely</p>
+    </div>
+
+    <!-- Main Card -->
+    <div class="card">
+        
+        <!-- Django Messages -->
+        {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+            <div class="alert-message {% if message.tags == 'success' %}alert-success{% endif %}">
+                <i class="fa-solid {% if message.tags == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Transfer Details -->
+        <div class="transfer-details">
+            <div class="detail-row">
+                <div class="detail-label">
+                    <i class="fa-solid fa-building-columns"></i>
+                    <span>Bank</span>
+                </div>
+                <div class="detail-value">
+                    <i class="fa-regular fa-circle-check" style="color: #22c55e; font-size: 0.8rem;"></i>
+                    {{ bank_name|default:"Opay Digital Bank" }}
+                </div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">
+                    <i class="fa-solid fa-user"></i>
+                    <span>Account Name</span>
+                </div>
+                <div class="detail-value">{{ account_name|default:"Daniel Udeme Eyo" }}</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">
+                    <i class="fa-solid fa-credit-card"></i>
+                    <span>Account Number</span>
+                </div>
+                <div class="detail-value">
+                    <span id="accountNumber">{{ account_number|default:"9048546775" }}</span>
+                    <button type="button" class="copy-btn" onclick="copyAccountNumber()">
+                        <i class="fa-regular fa-copy"></i> Copy
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Amount Highlight -->
+        <div class="amount-highlight">
+            <div class="label">
+                <i class="fa-solid fa-naira-sign"></i> Amount to Transfer
+            </div>
+            <div class="value">
+                ₦{{ amount|default:"0.00"|floatformat:2 }}
+            </div>
+        </div>
+
+        <!-- Security Notice -->
+        <div class="security-notice">
+            <i class="fa-solid fa-shield-haltered"></i>
+            <div>
+                <strong>Important:</strong> Transfer the exact amount above to the account details. Your contribution will be recorded after confirmation.
+            </div>
+        </div>
+
+        <!-- Django Form (preserved logic) -->
+        <form method="POST">
+            {% csrf_token %}
+            <button type="submit" class="submit-btn">
+                <i class="fa-solid fa-check-circle"></i>
+                I Have Made Payment
+            </button>
+        </form>
+
+        <!-- Additional Helper Text -->
+        <div class="helper-text">
+            <i class="fa-regular fa-clock"></i>
+            <span>Payment verification may take 2-5 minutes</span>
+            <i class="fa-solid fa-lock"></i>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Copy account number functionality
+    function copyAccountNumber() {
+        const accountNum = document.getElementById('accountNumber');
+        if (accountNum) {
+            const text = accountNum.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                // Show temporary copied notification
+                const btn = event.target.closest('.copy-btn');
+                if (btn) {
+                    const originalHTML = btn.innerHTML;
+                    btn.innerHTML = '<i class="fa-regular fa-check"></i> Copied!';
+                    setTimeout(() => {
+                        btn.innerHTML = originalHTML;
+                    }, 1500);
+                }
+            }).catch(err => {
+                console.log('Copy failed:', err);
+            });
+        }
+    }
+
+    // Add input focus effects
+    const inputs = document.querySelectorAll('input, select, button');
+    inputs.forEach(input => {
+        if (input.type !== 'submit' && !input.classList.contains('copy-btn')) {
+            input.addEventListener('focus', function() {
+                this.style.transform = 'scale(1.01)';
+            });
+            input.addEventListener('blur', function() {
+                this.style.transform = 'scale(1)';
+            });
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,6 +1,7 @@
 from django import forms
-from .models import Profile, Note
+from .models import Profile, Note, Contribution
 from django.contrib.auth.models import User
+
 
 
 class UserUpdateForm(forms.ModelForm):
@@ -22,3 +23,16 @@ class NoteForm(forms.ModelForm):
     class Meta:
         model = Note
         fields = ['title', 'content']
+        
+
+
+
+class ContributionForm(forms.ModelForm):
+
+    class Meta:
+
+        model = Contribution
+
+        fields = [
+            'amount'
+        ]
