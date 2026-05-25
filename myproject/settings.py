@@ -46,7 +46,7 @@ INSTALLED_APPS = [
 MEDIA_URL = '/media/'
 
 MEDIA_ROOT = BASE_DIR / 'media'
-FILE_UPLOAD_TEMP_DIR = "/data/data/com.termux/files/usr/tmp"
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
