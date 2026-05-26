@@ -22,7 +22,7 @@
         body {
             font-family: 'Inter', -apple-system, 'Segoe UI', sans-serif;
             background: linear-gradient(135deg, #f0f4f8 0%, #e8edf2 100%);
-            color: #1e293b;
+            color: #1a2c3e;
             overflow-x: hidden;
         }
 
@@ -215,7 +215,7 @@
             font-size: 1.2rem;
         }
 
-        /* Welcome Card - FIXED FOR LONG USERNAMES */
+        /* Welcome Card */
         .welcome-card {
             background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
             border-radius: 28px;
@@ -242,12 +242,6 @@
             border-radius: 50%;
         }
 
-        .welcome-text {
-            flex: 1;
-            min-width: 0; /* THIS IS KEY - allows truncation */
-            overflow: hidden;
-        }
-
         .welcome-text h2 {
             font-size: 1.6rem;
             font-weight: 700;
@@ -255,21 +249,6 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .welcome-text h2 i {
-            flex-shrink: 0;
-        }
-
-        /* THIS FIXES THE LONG USERNAME ISSUE */
-        .welcome-text .username {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            max-width: 350px;
-            display: inline-block;
-            vertical-align: middle;
         }
 
         .welcome-text p {
@@ -277,14 +256,12 @@
             font-size: 0.9rem;
         }
 
-        /* Progress Ring */
         .progress-ring {
             text-align: center;
             background: rgba(255,255,255,0.08);
             padding: 16px 24px;
             border-radius: 24px;
             backdrop-filter: blur(10px);
-            flex-shrink: 0;
         }
 
         .progress-ring .percentage {
@@ -298,7 +275,7 @@
             color: #94a3b8;
         }
 
-        /* Stats Grid - FIXED FOR CONSISTENT SIZE */
+        /* Stats Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -316,7 +293,6 @@
             display: flex;
             align-items: center;
             gap: 20px;
-            min-width: 0; /* Allows truncation */
         }
 
         .stat-card:hover {
@@ -333,18 +309,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0;
         }
 
         .stat-icon-lg i {
             font-size: 1.8rem;
             color: #3b82f6;
-        }
-
-        .stat-info {
-            flex: 1;
-            min-width: 0; /* Allows truncation */
-            overflow: hidden;
         }
 
         .stat-info .stat-label {
@@ -356,15 +325,11 @@
             margin-bottom: 4px;
         }
 
-        /* FIX FOR LONG NUMBER VALUES */
         .stat-info .stat-value {
-            font-size: 1.6rem;
+            font-size: 1.8rem;
             font-weight: 800;
             color: #0f172a;
             letter-spacing: -0.02em;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
         }
 
         .stat-info .stat-sub {
@@ -572,7 +537,7 @@
             padding: 40px;
         }
 
-        /* Mobile Responsive - FIXES FOR LONG NAMES ON PHONES */
+        /* Responsive */
         @media (max-width: 768px) {
             .main {
                 padding: 20px 16px;
@@ -583,30 +548,103 @@
             .welcome-card {
                 flex-direction: column;
                 text-align: center;
-                padding: 24px;
-            }
-            .welcome-text h2 {
-                font-size: 1.2rem;
-                justify-content: center;
-            }
-            .welcome-text .username {
-                max-width: 200px;
-                white-space: normal;
-                word-break: break-word;
             }
             .two-columns {
                 grid-template-columns: 1fr;
             }
             .menu-btn {
-                top: 15px;
+                top: 12px;
                 left: 16px;
                 width: 40px;
                 height: 40px;
             }
-            .stat-info .stat-value {
-                font-size: 1.3rem;
+            .top-bar {
+                justify-content: center;
+                margin-top: 40px;
             }
         }
+        
+        /* ========== FIX FOR LONG USERNAMES/EMAILS ========== */
+
+/* Welcome banner text truncation */
+.welcome-text h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+/* For the welcome text that contains email/username */
+.welcome-text h2 span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 300px;
+    display: inline-block;
+}
+
+/* For mobile screens */
+@media (max-width: 768px) {
+    .welcome-text h2 {
+        font-size: 1.2rem;
+        flex-wrap: wrap;
+        white-space: normal;
+    }
+    .welcome-text h2 span {
+        max-width: 200px;
+    }
+}
+
+/* Stat card text truncation */
+.stat-info .stat-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* For the username display in welcome banner - alternative approach */
+.welcome-text {
+    flex: 1;
+    min-width: 0; /* Important for flex truncation */
+    overflow: hidden;
+}
+
+.welcome-text h2 i {
+    flex-shrink: 0;
+}
+
+.welcome-text h2 .username {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    max-width: 100%;
+    vertical-align: middle;
+}
+
+/* Mobile responsive for long names */
+@media (max-width: 600px) {
+    .welcome-text h2 {
+        flex-wrap: wrap;
+        white-space: normal;
+        word-break: break-word;
+    }
+    .welcome-text h2 .username {
+        white-space: normal;
+        word-break: break-all;
+        max-width: 100%;
+    }
+}
     </style>
 </head>
 <body>
@@ -652,7 +690,7 @@
     </a>
 </div>
 
-<!-- Main Content -->
+<!-- Main Content - Full Width -->
 <div class="main" id="main">
 
     <!-- Top Bar -->
@@ -670,12 +708,12 @@
     </div>
     {% endfor %}
 
-    <!-- Welcome Card - FIXED: Long username will truncate with ellipsis -->
+    <!-- Welcome Card with Progress Ring -->
     <div class="welcome-card">
         <div class="welcome-text">
             <h2>
                 <i class="fa-solid fa-hand-wave"></i>
-                Welcome, <span class="username" title="{{ user.username }}">{{ user.username|truncatechars:30 }}</span>
+                Welcome, <span class="username">{{ user.username }}</span>
             </h2>
             <p>Track your progress and stay consistent with your weekly contributions</p>
         </div>
@@ -685,7 +723,7 @@
         </div>
     </div>
 
-    <!-- Stats Cards - FIXED: All cards now stay same size -->
+    <!-- Stats Cards -->
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-icon-lg">
@@ -693,9 +731,7 @@
             </div>
             <div class="stat-info">
                 <div class="stat-label">Weekly Amount</div>
-                <div class="stat-value" title="₦{{ user.profile.weekly_amount|default:'0.00'|floatformat:2 }}">
-                    ₦{{ user.profile.weekly_amount|default:"0.00"|floatformat:2 }}
-                </div>
+                <div class="stat-value">₦{{ user.profile.weekly_amount|default:"0.00"|floatformat:2 }}</div>
                 <div class="stat-sub">every Sunday</div>
             </div>
         </div>
@@ -705,9 +741,7 @@
             </div>
             <div class="stat-info">
                 <div class="stat-label">Total Paid</div>
-                <div class="stat-value" title="₦{{ total|default:'0.00'|floatformat:2 }}">
-                    ₦{{ total|default:"0.00"|floatformat:2 }}
-                </div>
+                <div class="stat-value">₦{{ total|default:"0.00"|floatformat:2 }}</div>
                 <div class="stat-sub">contributions to date</div>
             </div>
         </div>
@@ -717,9 +751,7 @@
             </div>
             <div class="stat-info">
                 <div class="stat-label">Target Goal</div>
-                <div class="stat-value" title="₦{{ target|default:'0.00'|floatformat:2 }}">
-                    ₦{{ target|default:"0.00"|floatformat:2 }}
-                </div>
+                <div class="stat-value">₦{{ target|default:"0.00"|floatformat:2 }}</div>
                 <div class="stat-sub">{{ total_weeks }}-week target</div>
             </div>
         </div>
@@ -765,7 +797,7 @@
                     <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                     {{ field }}
                     {% if field.errors %}
-                    <div style="color: #ef4444; font-size: 0.75rem; margin-top: 4px;">{{ field.errors }}</div>
+                      <div style="color: #ef4444; font-size: 0.75rem; margin-top: 4px;">{{ field.errors }}</div>
                     {% endif %}
                 </div>
                 {% endfor %}
@@ -782,32 +814,87 @@
             <i class="fa-solid fa-clock-rotate-left"></i>
             Contribution History
         </h3>
+    
         <div class="history-list">
-            {% for item in contributions %}
-            <div class="history-item">
-                <span class="history-week">
-                    <i class="fa-regular fa-calendar"></i> Week {{ item.week_number }}
-                </span>
-                <span class="history-status">
-                    <i class="fa-regular fa-circle-check"></i> {{ item.status }}
-                </span>
-                <span class="history-amount">
-                    ₦{{ item.amount|floatformat:2 }}
-                </span>
+    
+            {% for date, data in grouped_contributions.items %}
+    
+            <div style="margin-top:25px;">
+    
+                <h4 style="margin-bottom:10px; color:#0f766e;">
+    
+                    <i class="fa-solid fa-calendar-days"></i>
+    
+                    {{ date }}
+    
+                </h4>
+    
+                <div style="
+                    background:#f1f5f9;
+                    padding:10px;
+                    border-radius:10px;
+                    margin-bottom:10px;
+                    font-weight:bold;
+                ">
+    
+                    Total this period:
+                    ₦{{ data.total|floatformat:2 }}
+    
+                </div>
+    
+                {% for item in data.items %}
+    
+                <div class="history-item">
+    
+                    <span class="history-week">
+    
+                        <i class="fa-regular fa-calendar"></i>
+    
+                        Week {{ item.week_number }}
+    
+                    </span>
+    
+                    <span class="history-status">
+    
+                        <i class="fa-regular fa-circle-check"></i>
+    
+                        {{ item.status }}
+    
+                    </span>
+    
+                    <span class="history-amount">
+    
+                        ₦{{ item.amount|floatformat:2 }}
+    
+                    </span>
+    
+                </div>
+    
+                {% endfor %}
+    
             </div>
+    
             {% empty %}
+    
             <div class="empty-state">
-                <i class="fa-solid fa-inbox" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+    
+                <i class="fa-solid fa-inbox"
+                   style="font-size:2rem;margin-bottom:12px;display:block;">
+                </i>
+    
                 No contributions yet
+    
             </div>
+    
             {% endfor %}
+    
         </div>
+    
     </div>
-
 </div>
 
 <script>
-    // Toggle sidebar function
+    // Toggle sidebar function - sidebar starts completely hidden
     function toggleSidebar() {
         let sidebar = document.getElementById("sidebar");
         let overlay = document.getElementById("sidebarOverlay");
@@ -823,13 +910,6 @@
         overlay.classList.remove("active");
         document.body.style.overflow = "";
     }
-
-    // Close sidebar when pressing Escape key
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            closeSidebar();
-        }
-    });
 
     // Chart initialization
     const ctx = document.getElementById('myChart').getContext('2d');
@@ -896,7 +976,15 @@
             }
         }
     });
+
+    // Close sidebar when pressing Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeSidebar();
+        }
+    });
 </script>
 
 </body>
 </html>
+               
