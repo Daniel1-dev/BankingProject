@@ -3,17 +3,17 @@ from django.core.files.storage import FileSystemStorage
 
 class NoLockFileSystemStorage(FileSystemStorage):
     """
-    A custom storage backend that disables file locking,
-    which is not supported on some Android file systems.
+    A custom storage backend that disables file locking by 
+    bypassing the base _save method which calls fcntl.flock.
     """
     def _save(self, name, content):
-        # We override _save to prevent calling locks.lock which fails on Android
-        return super()._save(name, content)
-    
-    # Override lock and unlock methods to do absolutely nothing
-    # to avoid triggering the 'Function not implemented' error
-    def lock(self, file, flags):
-        pass
-
-    def unlock(self, file):
-        pass
+        # We manually save the file without calling any locks
+        full_path = self.path(name)
+        directory = os.path.dirname(full_path)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        
+        with open(full_path, 'wb+') as destination:
+            for chunk in content.chunks():
+                destination.write(chunk)
+        return name
