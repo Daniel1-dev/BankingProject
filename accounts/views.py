@@ -4,220 +4,143 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
-from django.http import HttpResponseForbidden
 from django.db.models import Sum
 from django.utils import timezone
 from django.contrib.auth import update_session_auth_hash
-
-from .models import Profile, Contribution, Payment
+import decimal
+import requests
+from django.conf import settings
+from django.http import JsonResponse
 import uuid
-from .forms import (
-    ContributionForm,
-    UserUpdateForm,
-    ProfileUpdateForm,
 
-)
+from .models import Profile, Transaction, Transfer
+from .forms import UserUpdateForm, ProfileUpdateForm
 
-
-from .models import (
+@login_required
+def dashboard(request):
+    profile, created = Profile.objects.get_or_create(user=request.user)
+    transactions = Transaction.objects.filter(user=request.user).order_by("-timestamp")
     
-    ContributionSettings
-)
+    total_deposits = transactions.filter(transaction_type="Deposit").aggregate(Sum("amount"))["amount__sum"] or 0
+    total_withdrawals = transactions.filter(transaction_type="Withdrawal").aggregate(Sum("amount"))["amount__sum"] or 0
+    total_transfers = transactions.filter(transaction_type="Transfer").aggregate(Sum("amount"))["amount__sum"] or 0
 
-
-
-
-@login_required
-def verify_admin(request):
-
-    if request.method == "POST":
-
-        password = request.POST.get(
-            "password"
-        )
-
-        user = authenticate(
-            request,
-            username=request.user.username,
-            password=password
-        )
-
-        if user and user.is_staff:
-
-            request.session[
-                "admin_verified"
-            ] = True
-
-            return redirect(
-                "admin_dashboard"
-            )
-
-        messages.error(
-            request,
-            "Incorrect admin password"
-        )
-
-    return render(
-        request,
-        "verify_admin.html"
-    )
-
-
-
-
-# ======================
-# TRANSFER VIEW
-# ======================
+    context = {
+        "transactions": transactions,
+        "total_deposits": total_deposits,
+        "total_withdrawals": total_withdrawals,
+        "total_transfers": total_transfers,
+    }
+    return render(request, "dashboard.html", context)
 
 @login_required
-def transfer(request):
-
-    profile = request.user.profile
-
-    amount = profile.weekly_amount or 0
-
+def transfer_money(request):
     if request.method == "POST":
+        bank_code = request.POST.get("bank_code")
+        account_number = request.POST.get("account_number")
+        amount = float(request.POST.get("amount", 0))
 
-        if amount <= 0:
+        if amount > float(request.user.profile.balance):
+            messages.error(request, "Insufficient balance.")
+            return redirect("dashboard")
 
-            messages.error(
-                request,
-                "Weekly contribution amount not set."
-            )
-
-            return redirect(
-                "dashboard"
-            )
-
-        Payment.objects.create(
-            user=request.user,
-            amount=amount
-        )
-
-        messages.success(
-            request,
-            "Transfer created successfully."
-        )
-
-        return redirect(
-            "dashboard"
-        )
-
-    return render(
-        request,
-        "transfer.html",
-        {
-            "amount": amount,
-            "account_number": "9048546775",
-            "account_name": "Daniel Udeme Eyo",
-            "bank_name": "Opay"
+        headers = {"Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}"}
+        recipient_data = {
+            "type": "nuban",
+            "name": "Recipient",
+            "account_number": account_number,
+            "bank_code": bank_code,
+            "currency": "NGN"
         }
-    )
+        res = requests.post("https://api.paystack.co/transferrecipient", json=recipient_data, headers=headers)
+        if res.status_code == 200:
+            recipient_code = res.json()['data']['recipient_code']
+            transfer_data = {"source": "balance", "reason": "Transfer", "amount": int(amount * 100), "recipient": recipient_code}
+            transfer_res = requests.post("https://api.paystack.co/transfer", json=transfer_data, headers=headers)
+            
+            if transfer_res.status_code == 200:
+                request.user.profile.balance -= decimal.Decimal(amount)
+                request.user.profile.save()
+                Transaction.objects.create(user=request.user, amount=amount, transaction_type="Transfer", description=f"Transfer to {account_number}")
+                messages.success(request, "Transfer successful!")
+            else:
+                messages.error(request, "Transfer failed.")
+        else:
+            messages.error(request, "Could not verify recipient.")
+            
+        return redirect("dashboard")
+    return render(request, "transfer_money.html")
 
-
-# ======================
-# LOGIN VIEW
-# ======================
-
-# ======================
-# LANDING PAGE
-# ======================
 def landing(request):
     return render(request, 'landing.html')
 
-
-
-# ======================
-# USER LOGIN
-# ======================
 def user_login(request):
     if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
-
         user = authenticate(request, username=username, password=password)
-
         if user is not None:
+            if hasattr(user, 'profile') and user.profile.is_suspended:
+                return render(request, 'suspended.html', {'user': user})
             if not user.is_active:
-                messages.error(request, "Your account has been suspended.")
+                messages.error(request, "Your account is inactive.")
             else:
                 login(request, user)
                 return redirect('dashboard')
         else:
+            # Check if this user exists and is suspended to provide specific feedback
+            try:
+                check_user = User.objects.get(username=username)
+                if hasattr(check_user, 'profile') and check_user.profile.is_suspended:
+                     return render(request, 'suspended.html', {'user': check_user})
+            except User.DoesNotExist:
+                pass
+            
             messages.error(request, "Invalid username or password")
-
     return render(request, 'login.html')
 
-
-# ======================
-# LOGOUT
-# ======================
 @login_required
 def user_logout(request):
     logout(request)
     return redirect('login')
 
-def logout_view(request):
-
-    request.session.pop(
-        "admin_verified",
-        None
-    )
-
-    logout(
-        request
-    )
-
-    return redirect(
-        "login"
-    )
-    
-    
-    
-def login_view(request):
+@staff_member_required
+def admin_profile(request):
+    user = request.user
+    profile = user.profile
+    error = None
+    success = None
     if request.method == "POST":
-
         username = request.POST.get("username")
-        password = request.POST.get("password")
+        email = request.POST.get("email")
+        new_password = request.POST.get("new_password")
+        confirm_password = request.POST.get("confirm_password")
+        profile_picture = request.FILES.get("profile_picture")
+        existing = User.objects.filter(username=username).exclude(id=user.id)
+        if existing.exists():
+            error = "Username already exists"
+        else:
+            user.username = username
+            user.email = email
+            if profile_picture:
+                profile.profile_picture = profile_picture
+            if new_password:
+                if new_password != confirm_password:
+                    error = "Passwords do not match"
+                else:
+                    user.set_password(new_password)
+            if not error:
+                user.save()
+                update_session_auth_hash(request, user)
+                profile.save()
+                success = "Profile updated successfully"
+    return render(request, "admin_profile.html", {"success": success, "error": error, "profile": profile})
 
-        user = authenticate(
-            request,
-            username=username,
-            password=password
-        )
-
-        if user is not None:
-
-            login(request, user)
-
-            if user.is_staff:
-                return redirect(
-                    "admin_dashboard"
-                )
-
-            return redirect(
-                "dashboard"
-            )
-
-        messages.error(
-            request,
-            "Invalid username or password"
-        )
-
-    return render(
-        request,
-        "login.html"
-    )
-    
-# ======================
-# PROFILE
-# ======================
 @login_required
 def profile(request):
     if request.method == "POST":
         user_form = UserUpdateForm(request.POST, instance=request.user)
         profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
-
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
             profile_form.save()
@@ -226,652 +149,224 @@ def profile(request):
     else:
         user_form = UserUpdateForm(instance=request.user)
         profile_form = ProfileUpdateForm(instance=request.user.profile)
-
-    return render(
-        request,
-        'profile.html',
-        {
-            'user_form': user_form,
-            'profile_form': profile_form
-        }
-    )
-
-
-# ======================
-# DASHBOARD
-# ======================
-
-# ======================
-# CUSTOM ADMIN DASHBOARD
-# ======================
-
-# ======================
-# EDIT CONTRIBUTION
-# ======================
-@staff_member_required
-def edit_contribution(request, contribution_id):
-    contribution = get_object_or_404(Contribution, id=contribution_id)
-
-    if request.method == "POST":
-        contribution.amount = request.POST.get("amount")
-        contribution.status = request.POST.get("status")
-        contribution.save()
-        return redirect('admin_dashboard')
-
-    return render(
-        request,
-        'edit_contribution.html',
-        {
-            'contribution': contribution
-        }
-    )
+    return render(request, 'profile.html', {'user_form': user_form, 'profile_form': profile_form})
 
 @staff_member_required
 def admin_dashboard(request):
-
     if not request.user.is_staff:
-
-        return redirect(
-            "dashboard"
-        )
-
-    if not request.session.get(
-        "admin_verified"
-    ):
-
-        return redirect(
-            "verify_admin"
-        )
+        return redirect("dashboard")
+    if not request.session.get("admin_verified"):
+        return redirect("verify_admin")
 
     users = User.objects.all()
-
-    contributions = Contribution.objects.all().order_by(
-        "-contribution_date"
-    )
+    transactions = Transaction.objects.all()
 
     total_users = users.count()
+    total_deposits = transactions.filter(transaction_type="Deposit").aggregate(Sum("amount"))["amount__sum"] or 0
+    total_withdrawals = transactions.filter(transaction_type="Withdrawal").aggregate(Sum("amount"))["amount__sum"] or 0
+    total_transfers = transactions.filter(transaction_type="Transfer").aggregate(Sum("amount"))["amount__sum"] or 0
+    total_balance = Profile.objects.aggregate(Sum("balance"))["balance__sum"] or 0
 
-    total_contributions = contributions.count()
+    return render(request, "admin_dashboard.html", {
+        "users": users,
+        "total_users": total_users,
+        "total_deposits": total_deposits,
+        "total_withdrawals": total_withdrawals,
+        "total_transfers": total_transfers,
+        "total_balance": total_balance,
+    })
 
-    total_amount = contributions.filter(
-        status="Paid"
-    ).aggregate(
-        Sum("amount")
-    )["amount__sum"] or 0
-
-    missed_count = contributions.filter(
-        status="Missed"
-    ).count()
-
-
-    grouped_admin = {}
-
-
-    for item in contributions:
-
-        date = item.contribution_date.strftime(
-            "%A %d %B %Y"
-        )
-
-        if date not in grouped_admin:
-
-            grouped_admin[date] = {
-
-                "items": [],
-                "total": 0
-
-            }
-
-        grouped_admin[date]["items"].append(
-            item
-        )
-
-        grouped_admin[date]["total"] += item.amount
-
-
-    return render(
-        request,
-        "admin_dashboard.html",
-        {
-            "users": users,
-            "contributions": contributions,
-            "grouped_admin": grouped_admin,
-            "total_users": total_users,
-            "total_contributions": total_contributions,
-            "total_amount": total_amount,
-            "missed_count": missed_count
-        }
-    )
-    
-# ======================
-# DELETE CONTRIBUTION
-# ======================
-@staff_member_required
-def delete_contribution(request, contribution_id):
-    contribution = get_object_or_404(Contribution, id=contribution_id)
-    contribution.delete()
-    return redirect('admin_dashboard')
-
-
-
-
-@staff_member_required
-def update_weeks(request):
-
-    settings = ContributionSettings.objects.first()
-
-    if not settings:
-
-        settings = ContributionSettings.objects.create(
-            total_weeks=12
-        )
-
-    if request.method=="POST":
-
-        weeks=request.POST.get(
-            "weeks"
-        )
-
-        settings.total_weeks=weeks
-        settings.save()
-
-        messages.success(
-            request,
-            "Contribution weeks updated successfully"
-        )
-
-        return redirect(
-            "admin_dashboard"
-        )
-
-    return render(
-        request,
-        "update_weeks.html",
-        {
-            "settings":settings
-        }
-    )
-
-
-# ======================
-# EDIT USER
-# ======================
-@staff_member_required
-def edit_user(request, user_id):
-    user = get_object_or_404(User, id=user_id)
-    profile = get_object_or_404(Profile, user=user)
-    error = None
-
-    if request.method == "POST":
-        username = request.POST.get("username")
-        email = request.POST.get("email")
-        weekly_amount = request.POST.get("weekly_amount")
-        password = request.POST.get("password")
-
-        # Only check duplicates if username changed
-        if username != user.username:
-            if User.objects.filter(username=username).exists():
-                error = "Username already exists"
-                return render(
-                    request,
-                    'edit_user.html',
-                    {
-                        'edit_user': user,
-                        'profile': profile,
-                        'error': error
-                    }
-                )
-
-        user.username = username
-        user.email = email
-        profile.weekly_amount = weekly_amount
-
-        if password:
-            user.set_password(password)
-
-        user.save()
-        profile.save()
-
-        return redirect('admin_dashboard')
-
-    return render(
-        request,
-        'edit_user.html',
-        {
-            'edit_user': user,
-            'profile': profile,
-            'error': error
-        }
-    )
-
-
-# ======================
-# DASHBOARD
-# ======================
-
-
-
-
-# ======================
-# ADMIN PROFILE
-# ======================
-@login_required
 @staff_member_required
 def admin_profile(request):
     user = request.user
     profile = user.profile
     error = None
     success = None
-
     if request.method == "POST":
         username = request.POST.get("username")
         email = request.POST.get("email")
         new_password = request.POST.get("new_password")
         confirm_password = request.POST.get("confirm_password")
         profile_picture = request.FILES.get("profile_picture")
-
-        # Prevent duplicate username
         existing = User.objects.filter(username=username).exclude(id=user.id)
-
         if existing.exists():
             error = "Username already exists"
         else:
             user.username = username
             user.email = email
-
             if profile_picture:
                 profile.profile_picture = profile_picture
-
             if new_password:
                 if new_password != confirm_password:
                     error = "Passwords do not match"
                 else:
                     user.set_password(new_password)
-
             if not error:
                 user.save()
                 update_session_auth_hash(request, user)
-
                 profile.save()
                 success = "Profile updated successfully"
+    return render(request, "admin_profile.html", {"success": success, "error": error, "profile": profile})
 
-    return render(
-        request,
-        "admin_profile.html",
-        {
-            "success": success,
-            "error": error,
-            "profile": profile
-        }
-    )
-
+@staff_member_required
+def verify_admin(request):
+    if request.method == "POST":
+        password = request.POST.get("password")
+        user = authenticate(request, username=request.user.username, password=password)
+        if user and user.is_staff:
+            request.session["admin_verified"] = True
+            return redirect("admin_dashboard")
+        messages.error(request, "Incorrect admin password")
+    return render(request, "verify_admin.html")
 
 def admin_login_view(request):
-
     if request.method == "POST":
-
-        username = request.POST.get(
-            "username"
-        )
-
-        password = request.POST.get(
-            "password"
-        )
-
-        user = authenticate(
-            request,
-            username=username,
-            password=password
-        )
-
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        user = authenticate(request, username=username, password=password)
         if user is not None:
-
             if user.is_staff:
-
-                login(
-                    request,
-                    user
-                )
-
-                return redirect(
-                    'admin_dashboard'
-                )
-
+                login(request, user)
+                return redirect('admin_dashboard')
             else:
-
-                messages.error(
-                    request,
-                    "This is not an admin account"
-                )
-
+                messages.error(request, "This is not an admin account")
         else:
+            messages.error(request, "Invalid admin credentials")
+    return render(request, 'admin_login.html')
 
-            messages.error(
-                request,
-                "Invalid admin credentials"
-            )
-
-    return render(
-        request,
-        'admin_login.html'
-    )
-
-# ======================
-# SUSPEND USER
-# ======================
 @staff_member_required
 def suspend_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
+    reason = request.POST.get("reason", "Policy violation")
     user.is_active = False
+    user.profile.is_suspended = True
+    user.profile.suspension_reason = reason
+    user.profile.suspended_at = timezone.now()
     user.save()
+    user.profile.save()
     return redirect('admin_dashboard')
 
-
-# ======================
-# UNSUSPEND USER
-# ======================
 @staff_member_required
 def unsuspend_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
     user.is_active = True
+    user.profile.is_suspended = False
+    user.profile.suspension_reason = ""
+    user.profile.suspended_at = None
     user.save()
+    user.profile.save()
     return redirect('admin_dashboard')
-    
 
-
-
-
-@login_required
-def dashboard(request):
-
-    profile = request.user.profile
-
-    contributions = Contribution.objects.filter(
-        user=request.user
-    ).order_by(
-        '-contribution_date'
-    )
-
-    weekly_amount = profile.weekly_amount or 0
-
-
-    total = contributions.filter(
-        status="Paid"
-    ).aggregate(
-        Sum("amount")
-    )["amount__sum"] or 0
-
-
-    if request.method == "POST":
-
-        form = ContributionForm(
-            request.POST
-        )
-
-        if form.is_valid():
-
-            contribution = form.save(
-                commit=False
-            )
-
-            if contribution.amount != weekly_amount:
-
-                messages.error(
-                    request,
-                    "Amount must match your fixed contribution amount"
-                )
-
-                return redirect(
-                    "dashboard"
-                )
-
-            contribution.user = request.user
-
-            contribution.contribution_date = (
-                timezone.now().date()
-            )
-
-            contribution.week_number = (
-                timezone.now().isocalendar()[1]
-            )
-
-            contribution.status = "Paid"
-
-            contribution.save()
-
-            return redirect(
-                "dashboard"
-            )
-
-    else:
-
-        form = ContributionForm()
-
-
-    settings, created = (
-        ContributionSettings.objects.get_or_create(
-            id=1,
-            defaults={
-                "total_weeks":12
-            }
-        )
-    )
-
-    total_weeks = settings.total_weeks
-
-
-    target = (
-        weekly_amount *
-        total_weeks
-    )
-
-
-    progress = 0
-
-    if target > 0:
-
-        progress = round(
-            (total / target) * 100,
-            1
-        )
-
-
-    chart_labels = []
-    chart_data = []
-
-
-    for item in contributions:
-
-        chart_labels.append(
-            f"Week {item.week_number}"
-        )
-
-        chart_data.append(
-            float(item.amount)
-        )
-
-
-    missed_count = contributions.filter(
-        status="Missed"
-    ).count()
-
-
-    notifications=[]
-
-    if missed_count > 0:
-
-        notifications.append(
-            f"You missed {missed_count} contribution(s)"
-        )
-
-
-    # GROUP CONTRIBUTIONS BY DATE
-    grouped_contributions={}
-
-
-    for contribution in contributions:
-
-        contribution_date = (
-            contribution.contribution_date
-        )
-
-        today = timezone.now().date()
-
-        if contribution_date == today:
-
-            date_label = (
-                f"Today ({contribution_date})"
-            )
-
-        elif contribution_date == (
-            today - timezone.timedelta(days=1)
-        ):
-
-            date_label = (
-                f"Yesterday ({contribution_date})"
-            )
-
-        else:
-
-            date_label = str(
-                contribution_date
-            )
-
-
-        if date_label not in grouped_contributions:
-
-            grouped_contributions[
-                date_label
-            ] = {
-
-                "items":[],
-                "total":0
-
-            }
-
-
-        grouped_contributions[
-            date_label
-        ]["items"].append(
-            contribution
-        )
-
-
-        grouped_contributions[
-            date_label
-        ]["total"] += (
-            contribution.amount
-        )
-
-
-    context={
-
-        "form":form,
-        "contributions":contributions,
-        "grouped_contributions":grouped_contributions,
-        "total":total,
-        "target":target,
-        "progress":progress,
-        "weekly_amount":weekly_amount,
-        "total_weeks":total_weeks,
-        "chart_labels":chart_labels,
-        "chart_data":chart_data,
-        "notifications":notifications
-
-    }
-
-    return render(
-        request,
-        "dashboard.html",
-        context
-    )
-
-
-
-
-
-# ======================
-# CHANGE CONTRIBUTION WEEKS
-# ======================
-
-@login_required
 @staff_member_required
-def change_weeks(request):
-
-    settings, created = (
-        ContributionSettings.objects.get_or_create(
-            id=1
-        )
-    )
-
+def edit_user(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    profile = get_object_or_404(Profile, user=user)
+    error = None
     if request.method == "POST":
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        if username != user.username and User.objects.filter(username=username).exists():
+            error = "Username already exists"
+        else:
+            user.username = username
+            user.email = email
+            if password:
+                user.set_password(password)
+            user.save()
+            profile.save()
+            return redirect('admin_dashboard')
+    return render(request, 'edit_user.html', {'edit_user': user, 'profile': profile, 'error': error})
 
-        weeks = request.POST.get(
-            "total_weeks"
-        )
-
-        settings.total_weeks = weeks
-        settings.save()
-
-        messages.success(
-            request,
-            "Contribution weeks updated successfully"
-        )
-
-        return redirect(
-            "admin_dashboard"
-        )
-
-    return render(
-        request,
-        "change_weeks.html",
-        {
-            "settings": settings
-        }
-    )
-    
-    
-    
 def register(request):
-
     if request.method == "POST":
-
         username = request.POST.get("username")
         full_name = request.POST.get("full_name")
+        gender = request.POST.get("gender")
         email = request.POST.get("email")
-        weekly_amount = request.POST.get("weekly_amount")
+        phone_number = request.POST.get("phone_number")
+        address = request.POST.get("address")
+        profile_picture = request.FILES.get("profile_picture")
         password = request.POST.get("password")
-
-        # Check username exists
         if User.objects.filter(username=username).exists():
-
-            messages.error(
-                request,
-                "Username already exists"
-            )
-
+            messages.error(request, "Username already exists")
             return redirect("register")
-
-        user = User.objects.create_user(
-            username=username,
-            email=email,
-            password=password
-        )
-
-        # Profile already created by signal.py
+        user = User.objects.create_user(username=username, email=email, password=password)
         profile = user.profile
         profile.full_name = full_name
-        profile.weekly_amount = weekly_amount
+        profile.gender = gender
+        profile.phone_number = phone_number
+        profile.address = address
+        if profile_picture:
+            profile.profile_picture = profile_picture
         profile.save()
-
-        messages.success(
-            request,
-            "Registration successful"
-        )
-
+        messages.success(request, "Registration successful")
         return redirect("login")
+    return render(request, "register.html")
 
-    return render(
-        request,
-        "register.html"
-    )
+@login_required
+def deposit(request):
+    if request.method == "POST":
+        amount = float(request.POST.get("amount", 0))
+        if amount > 0:
+            request.user.profile.balance += decimal.Decimal(amount)
+            request.user.profile.save()
+            Transaction.objects.create(user=request.user, amount=amount, transaction_type="Deposit", description="Wallet Deposit")
+            messages.success(request, f"Successfully deposited ₦{amount:.2f}")
+        return redirect("dashboard")
+    return render(request, "deposit.html", {"account_number": "9048546775", "account_name": "Daniel Udeme Eyo", "bank_name": "Opay"})
+
+@login_required
+def withdraw(request):
+    if request.method == "POST":
+        amount = float(request.POST.get("amount", 0))
+        if amount > 0 and request.user.profile.balance >= amount:
+            request.user.profile.balance -= decimal.Decimal(amount)
+            request.user.profile.save()
+            Transaction.objects.create(user=request.user, amount=amount, transaction_type="Withdrawal", description="Wallet Withdrawal")
+            messages.success(request, f"Successfully withdrew ₦{amount:.2f}")
+        else:
+            messages.error(request, "Insufficient balance.")
+        return redirect("dashboard")
+    return render(request, "withdraw.html")
+
+@login_required
+def transactions_history(request):
+    transactions = Transaction.objects.filter(user=request.user).order_by("-timestamp")
+    return render(request, "transactions_history.html", {"transactions": transactions})
+
+@login_required
+def services(request):
+    return render(request, 'services.html')
+
+@login_required
+def airtime(request):
+    if request.method == "POST":
+        messages.success(request, "Airtime purchase successful!")
+        return redirect('services')
+    return render(request, 'airtime.html')
+
+@login_required
+def data(request):
+    if request.method == "POST":
+        messages.success(request, "Data purchase successful!")
+        return redirect('services')
+    return render(request, 'data.html')
+
+@login_required
+def bills(request):
+    if request.method == "POST":
+        messages.success(request, "Bill payment successful!")
+        return redirect('services')
+    return render(request, 'bills.html')
+
+@login_required
+def resolve_account(request):
+    account_number = request.GET.get('account_number')
+    bank_code = request.GET.get('bank_code')
+    headers = {"Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}"}
+    url = f"https://api.paystack.co/bank/resolve?account_number={account_number}&bank_code={bank_code}"
+    res = requests.get(url, headers=headers)
+    if res.status_code == 200:
+        return JsonResponse(res.json()['data'])
+    return JsonResponse({"error": "Account not found"}, status=400)

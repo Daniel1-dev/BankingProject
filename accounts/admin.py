@@ -1,31 +1,10 @@
 from django.contrib import admin
-from .models import Profile, Contribution
-
+from .models import Profile, Transaction
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'full_name', 'balance')
 
-    list_display = (
-        'user',
-        'weekly_amount'
-    )
-
-
-@admin.register(Contribution)
-class ContributionAdmin(admin.ModelAdmin):
-
-    list_display = (
-        'user',
-        'amount',
-        'contribution_date',
-        'week_number',
-        'status'
-    )
-
-    list_filter = (
-        'status',
-    )
-
-    search_fields = (
-        'user__username',
-    )
+@admin.register(Transaction)
+class TransactionAdmin(admin.ModelAdmin):
+    list_display = ('user', 'amount', 'transaction_type', 'timestamp')

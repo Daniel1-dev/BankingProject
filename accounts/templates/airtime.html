@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy Airtime • Modern Bank</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+    <div class="bg-white p-8 rounded-3xl shadow-lg max-w-sm mx-auto">
+        <h1 class="text-2xl font-bold mb-6">Buy Airtime</h1>
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-sm font-bold mb-2">Network</label>
+                <select name="network" class="w-full p-3 rounded-xl border border-gray-300 outline-none">
+                    <option>MTN</option>
+                    <option>Airtel</option>
+                    <option>Glo</option>
+                    <option>9mobile</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-bold mb-2">Phone Number</label>
+                <input type="tel" name="phone" class="w-full p-3 rounded-xl border border-gray-300 outline-none" required>
+            </div>
+            <div>
+                <label class="block text-sm font-bold mb-2">Amount (₦)</label>
+                <input type="number" name="amount" class="w-full p-3 rounded-xl border border-gray-300 outline-none" required>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl">Proceed</button>
+        </form>
+    </div>
+</body>
+</html>

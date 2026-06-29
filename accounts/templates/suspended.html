@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Suspended • Modern Bank</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center p-6">
+    <div class="bg-slate-800 p-10 rounded-3xl shadow-2xl text-center max-w-md w-full border border-slate-700">
+        <div class="text-red-500 text-6xl mb-6">
+            <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <h1 class="text-3xl font-bold mb-4">Account Suspended</h1>
+        <div class="bg-slate-700 p-4 rounded-xl mb-6 text-left">
+            <p class="text-sm text-slate-300"><strong>Reason:</strong> {{ user.profile.suspension_reason|default:"Policy violation" }}</p>
+            <p class="text-sm text-slate-300"><strong>Suspended at:</strong> {{ user.profile.suspended_at|date:"M d, Y, H:i" }}</p>
+        </div>
+        <p class="text-slate-400 mb-8">Your account has been suspended by our administration. Please contact support for further assistance regarding your account status.</p>
+        <a href="{% url 'login' %}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-full transition duration-300">
+            Back to Login
+        </a>
+    </div>
+</body>
+</html>

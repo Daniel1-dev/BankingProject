@@ -420,6 +420,7 @@
         </div>
         {% endif %}
 
+        {% if amount >= 3000 %}
         <!-- Transfer Details -->
         <div class="transfer-details">
             <div class="detail-row">
@@ -454,17 +455,7 @@
                 </div>
             </div>
         </div>
-
-        <!-- Amount Highlight -->
-        <div class="amount-highlight">
-            <div class="label">
-                <i class="fa-solid fa-naira-sign"></i> Amount to Transfer
-            </div>
-            <div class="value">
-                ₦{{ amount|default:"0.00"|floatformat:2 }}
-            </div>
-        </div>
-
+        
         <!-- Security Notice -->
         <div class="security-notice">
             <i class="fa-solid fa-shield-haltered"></i>
@@ -472,6 +463,14 @@
                 <strong>Important:</strong> Transfer the exact amount above to the account details. Your contribution will be recorded after confirmation.
             </div>
         </div>
+        {% else %}
+        <div class="security-notice">
+            <i class="fa-solid fa-info-circle"></i>
+            <div>
+                Bank transfer details are only available for amounts of ₦3,000 and above.
+            </div>
+        </div>
+        {% endif %}
 
         <!-- Django Form (preserved logic) -->
         <form method="POST">

@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head><title>Deposit</title></head>
+<body>
+    <h1>Deposit Money</h1>
+    <p>Please pay into: {{ bank_name }} - {{ account_name }} - {{ account_number }}</p>
+    <form method="POST">
+        {% csrf_token %}
+        <input type="number" name="amount" placeholder="Amount" required>
+        <button type="submit">Confirm Deposit</button>
+    </form>
+</body>
+</html>
