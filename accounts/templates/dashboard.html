@@ -38,12 +38,12 @@
     <!-- Header -->
     <header class="bg-blue-600 text-white p-6 pb-20 rounded-b-3xl">
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-xl font-bold">Modern Bank</h1>
+            <h1 class="text-xl font-bold">Welcome, {{ user.profile.full_name|default:user.username }}</h1>
             <div class="flex items-center gap-4">
                 {% if user.is_staff %}
                 <a href="{% url 'admin_dashboard' %}" class="bg-white/20 px-3 py-1 rounded-full text-xs font-bold hover:bg-white/30">Admin</a>
                 {% endif %}
-                <a href="{% url 'profile' %}"><i class="fa-solid fa-user-circle text-2xl"></i></a>
+                <a href="{% url 'settings' %}"><i class="fa-solid fa-user-circle text-2xl"></i></a>
             </div>
         </div>
         <div class="bg-white/20 p-6 rounded-2xl">

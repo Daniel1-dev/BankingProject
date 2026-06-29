@@ -1,16 +1,45 @@
 <!DOCTYPE html>
-<html>
-<head><title>Transactions</title></head>
-<body>
-    <h1>Transaction History</h1>
-    <table>
-        {% for t in transactions %}
-        <tr>
-            <td>{{ t.timestamp }}</td>
-            <td>{{ t.transaction_type }}</td>
-            <td>₦{{ t.amount }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction History • Modern Bank</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 min-h-screen flex items-center justify-center p-6">
+    <div class="bg-white w-full max-w-2xl p-8 rounded-3xl shadow-2xl">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold text-blue-600">Transaction History</h1>
+            <p class="text-gray-500 mt-2">All your recent transactions</p>
+        </div>
+
+        {% if transactions %}
+        <div class="space-y-4">
+            {% for t in transactions %}
+            <div class="bg-gray-50 p-4 rounded-xl shadow-sm flex justify-between items-center">
+                <div>
+                    <p class="text-lg font-semibold text-gray-800">{{ t.transaction_type }}</p>
+                    <p class="text-sm text-gray-500">{{ t.description }}</p>
+                    <p class="text-xs text-gray-400">{{ t.timestamp|date:"M d, Y H:i" }}</p>
+                </div>
+                <p class="text-lg font-bold {% if t.transaction_type == 'Deposit' %}text-green-600{% else %}text-red-600{% endif %}">
+                    ₦{{ t.amount|floatformat:2 }}
+                </p>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center text-gray-500 py-10">
+            <p>No transactions yet.</p>
+            <p class="mt-2"><a href="{% url 'dashboard' %}" class="text-blue-600 font-bold hover:underline">Go to Dashboard</a></p>
+        </div>
+        {% endif %}
+
+        <div class="text-center mt-6">
+            <a href="{% url 'dashboard' %}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-xl shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
 </body>
 </html>

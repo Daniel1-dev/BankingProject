@@ -2,53 +2,78 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Secure Transfer | Modern Bank</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; background: #f8fafc; display: flex; justify-content: center; padding-top: 50px; }
-        .transfer-card { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
-        h2 { color: #1e293b; margin-bottom: 25px; text-align: center; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; color: #475569; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 16px; }
-        button { width: 100%; padding: 14px; background: #2563eb; color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; margin-top: 10px; }
-        #accountDetails { margin-top: 20px; padding: 15px; background: #f0f9ff; border-radius: 12px; display: none; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer | Modern Bank</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
-<body>
-    <div class="transfer-card">
-        <h2><i class="fa-solid fa-money-bill-transfer"></i> Secure Transfer</h2>
-        <form method="POST" id="transferForm">
+<body class="bg-gray-900 min-h-screen flex items-center justify-center p-6">
+    <div class="bg-white w-full max-w-lg p-8 rounded-3xl shadow-2xl" 
+        x-data="{ 
+            bankCode: '', 
+            accountNumber: '', 
+            amount: '', 
+            get isFormValid() { return this.bankCode !== '' && this.accountNumber !== '' && this.amount !== '' } 
+        }">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold text-blue-600">Transfer Money</h1>
+            <p class="text-gray-500 mt-2">Send funds to any bank account</p>
+        </div>
+
+        {% if messages %}
+        <div class="mb-6">
+            {% for message in messages %}
+            <div class="bg-red-100 text-red-700 p-4 rounded-xl text-sm font-medium mb-2">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="POST" id="transferForm" class="space-y-4">
             {% csrf_token %}
-            <div class="form-group">
-                <label>Bank</label>
-                <input type="text" id="bankCode" name="bank_code" placeholder="Enter Bank Code (e.g. 058)" required>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Bank Code</label>
+                <input type="text" id="bankCode" name="bank_code" x-model="bankCode" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. 058" required>
             </div>
-            <div class="form-group">
-                <label>Account Number</label>
-                <input type="text" id="accNum" name="account_number" placeholder="Enter Account Number" required onblur="resolveAcc()">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Account Number</label>
+                <input type="text" id="accNum" name="account_number" x-model="accountNumber" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Enter 10-digit number" required onblur="resolveAcc()">
             </div>
-            <div id="accountDetails"></div>
-            <div class="form-group">
-                <label>Amount (₦)</label>
-                <input type="number" name="amount" placeholder="0.00" required>
+            <div id="accountDetails" class="hidden bg-blue-50 text-blue-700 p-4 rounded-xl text-sm font-semibold border border-blue-100"></div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Amount (₦)</label>
+                <input type="number" name="amount" x-model="amount" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="0.00" required>
             </div>
-            <button type="submit">Transfer Funds</button>
+            <button type="submit" :disabled="!isFormValid" class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold py-3 rounded-xl transition shadow-lg">Send Money</button>
         </form>
+
+        <div class="text-center mt-6">
+            <a href="{% url 'dashboard' %}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-xl shadow-sm text-gray-700 bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                Back to Dashboard
+            </a>
+        </div>
     </div>
 
     <script>
         async function resolveAcc() {
             const acc = document.getElementById('accNum').value;
             const bank = document.getElementById('bankCode').value;
+            const div = document.getElementById('accountDetails');
             if(acc.length === 10 && bank) {
                 const res = await fetch(`/resolve-account/?account_number=${acc}&bank_code=${bank}`);
                 const data = await res.json();
-                const div = document.getElementById('accountDetails');
                 if(data.account_name) {
-                    div.style.display = 'block';
-                    div.innerHTML = `<strong>Recipient: ${data.account_name}</strong>`;
+                    div.classList.remove('hidden');
+                    div.innerHTML = `<i class="fa-solid fa-user-check mr-2"></i> Recipient: ${data.account_name}`;
+                } else {
+                    div.classList.remove('hidden');
+                    div.innerHTML = `<i class="fa-solid fa-exclamation-circle mr-2"></i> Account not found`;
                 }
+            } else {
+                 div.classList.add('hidden');
+                 div.innerHTML = '';
             }
         }
     </script>

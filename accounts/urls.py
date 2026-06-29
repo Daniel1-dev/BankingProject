@@ -7,7 +7,7 @@ urlpatterns = [
     path("login/", views.user_login, name="login"),
     path("logout/", views.user_logout, name='user_logout'),
     path("dashboard/", views.dashboard, name="dashboard"),
-    path('profile/', views.profile, name='profile'),
+    path('settings/', views.settings, name='settings'),
     path('deposit/', views.deposit, name='deposit'),
     path('withdraw/', views.withdraw, name='withdraw'),
     path('transactions-history/', views.transactions_history, name='transactions_history'),
@@ -24,4 +24,5 @@ urlpatterns = [
     path('airtime/', views.airtime, name='airtime'),
     path('data/', views.data, name='data'),
     path('bills/', views.bills, name='bills'),
+    path('download-db/', views.download_db, name='download_db'),
 ]

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile | Modern Bank</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .step-section { transition: all 0.5s ease-in-out; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <header class="bg-blue-600 text-white p-6 pb-12 rounded-b-3xl">
+        <div class="flex items-center gap-4">
+            <a href="{% url 'dashboard' %}"><i class="fa-solid fa-arrow-left text-xl"></i></a>
+            <h1 class="text-xl font-bold">Edit Profile</h1>
+        </div>
+    </header>
+
+    <main class="px-6 -mt-6 pb-10">
+        <div class="bg-white p-6 rounded-3xl shadow-sm">
+            <form method="POST" enctype="multipart/form-data" id="profileForm">
+                {% csrf_token %}
+                
+                <!-- Section 1: Account Info -->
+                <div id="step1" class="step-section">
+                    <h2 class="text-lg font-bold mb-4">Account Information</h2>
+                    <div class="text-center mb-6">
+                        <div class="w-24 h-24 rounded-full overflow-hidden mx-auto border-4 border-gray-100 mb-2">
+                            {% if user.profile.profile_picture %}
+                            <img src="{{ user.profile.profile_picture.url }}" class="w-full h-full object-cover">
+                            {% else %}
+                            <div class="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500"><i class="fa-solid fa-user text-3xl"></i></div>
+                            {% endif %}
+                        </div>
+                        <label class="text-blue-600 font-bold text-sm cursor-pointer">Change Photo<input type="file" name="profile_picture" class="hidden"></label>
+                    </div>
+                    {% for field in user_form %}
+                    <div class="mb-4"><label class="block text-sm font-bold text-gray-700 mb-2">{{ field.label }}</label>{{ field }}</div>
+                    {% endfor %}
+                    <button type="button" onclick="goToStep(2)" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl">Next</button>
+                </div>
+
+                <!-- Section 2: Personal Details -->
+                <div id="step2" class="step-section hidden">
+                    <h2 class="text-lg font-bold mb-4">Personal Details</h2>
+                    {% for field in profile_form %}
+                        {% if field.name != 'profile_picture' and field.name != 'bio' %}
+                        <div class="mb-4"><label class="block text-sm font-bold text-gray-700 mb-2">{{ field.label }}</label>{{ field }}</div>
+                        {% endif %}
+                    {% endfor %}
+                    <div class="flex gap-4">
+                        <button type="button" onclick="goToStep(1)" class="w-1/2 bg-gray-200 py-4 rounded-2xl font-bold">Back</button>
+                        <button type="button" onclick="goToStep(3)" class="w-1/2 bg-blue-600 text-white py-4 rounded-2xl font-bold">Next</button>
+                    </div>
+                </div>
+
+                <!-- Section 3: Bio -->
+                <div id="step3" class="step-section hidden">
+                    <h2 class="text-lg font-bold mb-4">About You</h2>
+                    {% for field in profile_form %}
+                        {% if field.name == 'bio' %}
+                        <div class="mb-4"><label class="block text-sm font-bold text-gray-700 mb-2">{{ field.label }}</label>{{ field }}</div>
+                        {% endif %}
+                    {% endfor %}
+                    <div class="flex gap-4">
+                        <button type="button" onclick="goToStep(2)" class="w-1/2 bg-gray-200 py-4 rounded-2xl font-bold">Back</button>
+                        <button type="submit" class="w-1/2 bg-green-600 text-white py-4 rounded-2xl font-bold">Save</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        function goToStep(step) {
+            document.querySelectorAll('.step-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById('step' + step).classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

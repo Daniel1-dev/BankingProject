@@ -15,6 +15,8 @@ import uuid
 
 from .models import Profile, Transaction, Transfer
 from .forms import UserUpdateForm, ProfileUpdateForm
+from django.http import FileResponse, Http404
+import os
 
 @login_required
 def dashboard(request):
@@ -137,7 +139,7 @@ def admin_profile(request):
     return render(request, "admin_profile.html", {"success": success, "error": error, "profile": profile})
 
 @login_required
-def profile(request):
+def settings(request):
     if request.method == "POST":
         user_form = UserUpdateForm(request.POST, instance=request.user)
         profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
@@ -145,11 +147,11 @@ def profile(request):
             user_form.save()
             profile_form.save()
             messages.success(request, "Profile updated successfully")
-            return redirect('profile')
+            return redirect('settings')
     else:
         user_form = UserUpdateForm(instance=request.user)
         profile_form = ProfileUpdateForm(instance=request.user.profile)
-    return render(request, 'profile.html', {'user_form': user_form, 'profile_form': profile_form})
+    return render(request, 'settings.html', {'user_form': user_form, 'profile_form': profile_form})
 
 @staff_member_required
 def admin_dashboard(request):
@@ -370,3 +372,11 @@ def resolve_account(request):
     if res.status_code == 200:
         return JsonResponse(res.json()['data'])
     return JsonResponse({"error": "Account not found"}, status=400)
+
+@staff_member_required
+def download_db(request):
+    db_path = os.path.join(settings.BASE_DIR, 'db.sqlite3')
+    if os.path.exists(db_path):
+        return FileResponse(open(db_path, 'rb'), as_attachment=True, filename='db.sqlite3')
+    else:
+        raise Http404('Database file not found')
