@@ -12,4 +12,7 @@ class NoLockFileSystemStorage(FileSystemStorage):
 
     def _open(self, name, mode='rb'):
         return super()._open(name, mode)
-EOF
+    
+    # Explicitly override lock_file to return None to prevent file locking logic
+    def lock_file(self, *args, **kwargs):
+        return None
