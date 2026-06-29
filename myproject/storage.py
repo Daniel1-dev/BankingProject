@@ -1,5 +1,6 @@
 import os
 from django.core.files.storage import FileSystemStorage
+from django.core.files import locks
 
 class NoLockFileSystemStorage(FileSystemStorage):
     """
@@ -13,6 +14,10 @@ class NoLockFileSystemStorage(FileSystemStorage):
     def _open(self, name, mode='rb'):
         return super()._open(name, mode)
     
-    # Explicitly override lock_file to return None to prevent file locking logic
-    def lock_file(self, *args, **kwargs):
-        return None
+    def lock_file(self, fd, flags):
+        # Disable locking entirely by doing nothing
+        pass
+        
+    def unlock_file(self, fd):
+        # Disable unlocking entirely by doing nothing
+        pass
