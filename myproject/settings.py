@@ -25,10 +25,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-#&%v$shyjr2bf#sg$tp5!&o)8t(sh(e_56p113a8z-ax$e7l@3")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = [
     "contritracker.onrender.com",
+    "bankingproject-rk9r.onrender.com",
     "localhost",
     "127.0.0.1"
 ]
