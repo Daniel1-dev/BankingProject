@@ -1,19 +1,16 @@
-import os
 from django.core.files.storage import FileSystemStorage
+from django.core.files import locks
+from unittest.mock import MagicMock
+
+# Monkey-patch the locks module globally within this process
+# to return immediately without calling underlying system functions.
+locks.lock = MagicMock()
+locks.unlock = MagicMock()
 
 class NoLockFileSystemStorage(FileSystemStorage):
     """
-    A custom storage backend that disables file locking by 
-    bypassing the base _save method which calls fcntl.flock.
+    A custom storage backend that disables file locking.
+    By patching the 'locks' module, we prevent the Django core
+    from attempting to execute system-level locks.
     """
-    def _save(self, name, content):
-        # We manually save the file without calling any locks
-        full_path = self.path(name)
-        directory = os.path.dirname(full_path)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-        
-        with open(full_path, 'wb+') as destination:
-            for chunk in content.chunks():
-                destination.write(chunk)
-        return name
+    pass
